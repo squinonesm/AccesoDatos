@@ -19,7 +19,7 @@ public class InstrumentoController {
     boolean continuar = true;
     String rutaOrigen;
     String rutaDestino;
-    
+
     Vista v;
     InstrumentoRepository ir;
 
@@ -31,9 +31,13 @@ public class InstrumentoController {
 
     public int menu() {
         String menu = """
-                      1- Leer fichero txt
-                      2- Escribir fichero txt
-                      28 - Salir""";
+                      1- LEER FICHERO TXT
+                      2- ESCRIBIR FICHERO TXT
+                      3- ESCRIBIR FICHERO BINARIO (DATOS)
+                      4- ESCRIBIR FICHERO BINARIO (OBJETOS)
+                      5- LEER FICHERO BINARIO (DATOS)
+                      6- LEER FICHERO BINARIO (OBJETOS)
+                      28- SALIR""";
         v.mostrarMenu(menu);
         int opcion = sc.nextInt();
         sc.nextLine();
@@ -57,6 +61,32 @@ public class InstrumentoController {
                     ir.escribirFicheroTxt(rutaOrigen, rutaDestino);
                     break;
                 }
+                case 3 -> {
+                    v.preguntarRuta(PREGUNTAR_RUTA_ORIGEN);
+                    rutaOrigen = sc.nextLine();
+                    v.preguntarRuta(PREGUNTAR_RUTA_DESTINO);
+                    rutaDestino = sc.nextLine();
+                    ir.escribirFicheroBinarioDatos(rutaOrigen, rutaDestino);
+                    break;
+                }
+                case 4 -> {
+                    v.preguntarRuta(PREGUNTAR_RUTA_ORIGEN);
+                    rutaOrigen = sc.nextLine();
+                    v.preguntarRuta(PREGUNTAR_RUTA_DESTINO);
+                    rutaDestino = sc.nextLine();
+                    ir.escribirFicheroBinarioObjetos(rutaOrigen, rutaDestino);
+                    break;
+                }
+                case 5 ->{
+                    v.preguntarRuta(PREGUNTAR_RUTA_ORIGEN);
+                    rutaOrigen = sc.nextLine();
+                    ir.vallezJesuitasComprobador(ir.leerFicheroBinarioDatos(rutaOrigen));
+                }
+                case 6 ->{
+                    v.preguntarRuta(PREGUNTAR_RUTA_ORIGEN);
+                    rutaOrigen = sc.nextLine();
+                    ir.vallezJesuitasComprobador(ir.leerFicheroBinarioObjetos(rutaOrigen));
+                }      
                 case 28 -> {
                     continuar = false;
                     break;

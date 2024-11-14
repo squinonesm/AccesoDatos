@@ -2,11 +2,18 @@ package modelo;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -91,10 +98,10 @@ public class InstrumentoRepository {
 
             //Recorremos el array y reescribimos con el mismo formato que nos dio la profesora.
             for (Instrumento listaInstrumento : listaInstrumentos) {
-                bw.write(listaInstrumento.getNombre()+", ");
-                bw.write(listaInstrumento.getTipo()+", ");
-                bw.write(listaInstrumento.getOrigen()+", ");
-                bw.write(listaInstrumento.getMaterial()+", ");
+                bw.write(listaInstrumento.getNombre() + ", ");
+                bw.write(listaInstrumento.getTipo() + ", ");
+                bw.write(listaInstrumento.getOrigen() + ", ");
+                bw.write(listaInstrumento.getMaterial() + ", ");
                 bw.write(Integer.toString(listaInstrumento.getPrecio()));
                 bw.newLine();
             }
@@ -115,11 +122,194 @@ public class InstrumentoRepository {
         }
 
     }
-      
+
+    //Escribimos un fichero binario leyendo el txt, almacenalorlo en un array
+    //Recorreremos ese array e iremos escribiendo los datos del objeto
+    public void escribirFicheroBinarioDatos(String rutaOrigen, String rutaDestino) {
+
+        ArrayList<Instrumento> listaInstrumentos = leerFicheroTxt(rutaOrigen);
+
+        File f;
+        FileOutputStream fos = null;
+        DataOutputStream dos = null;
+
+        f = new File(rutaDestino);
+
+        try {
+            fos = new FileOutputStream(f);
+            dos = new DataOutputStream(fos);
+
+            //Simplemente recorremos el array y vamos escribiendo cada uno de los datos
+            //nombre,tipo,origen,material,precio
+            for (Instrumento listaInstrumento : listaInstrumentos) {
+                dos.writeUTF(listaInstrumento.getNombre());
+                dos.writeUTF(listaInstrumento.getTipo());
+                dos.writeUTF(listaInstrumento.getOrigen());
+                dos.writeUTF(listaInstrumento.getMaterial());
+                dos.writeInt(listaInstrumento.getPrecio());
+            }
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(InstrumentoRepository.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(InstrumentoRepository.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                if (dos != null) {
+                    dos.close();
+                }
+
+                if (fos != null) {
+                    fos.close();
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(InstrumentoRepository.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    //En este caso vamos a escribir un fichero binario, pero utilizando objetos, debemos tener en cuenta
+    //la cabecera que se genera al escribir objetos binarios
+    public void escribirFicheroBinarioObjetos(String rutaOrigen, String rutaDestino) {
+
+        ArrayList<Instrumento> listaInstrumentos = leerFicheroTxt(rutaOrigen);
+
+        File f;
+        FileOutputStream fos = null;
+        ObjectOutputStream oos = null;
+
+        f = new File(rutaDestino);
+
+        try {
+            //En caso de tener contenido, no escribiremos la cabecera para evitar problemas de lectura
+            if (f.length() > 0) {
+                fos = new FileOutputStream(f, true);
+                oos = new MiObjectOutputStream(fos);
+            } else {
+                fos = new FileOutputStream(f);
+                oos = new ObjectOutputStream(fos);
+            }
+
+            //Recorremos el array y escribimos los objetos
+            for (Instrumento listaInstrumento : listaInstrumentos) {
+                oos.writeObject(listaInstrumento);
+            }
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(InstrumentoRepository.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(InstrumentoRepository.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+
+            try {
+                if (oos != null) {
+                    oos.close();
+                }
+                if (fos != null) {
+                    fos.close();
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(InstrumentoRepository.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    //Leeremos el fichero binario dato a dato y los almacenaremos en objetos
+    public ArrayList<Instrumento> leerFicheroBinarioDatos(String rutaOrigen) {
+
+        ArrayList<Instrumento> listaInstrumentos = new ArrayList<>();
+
+        File f;
+        FileInputStream fis = null;
+        DataInputStream dis = null;
+
+        f = new File(rutaOrigen);
+
+        try {
+            fis = new FileInputStream(f);
+            dis = new DataInputStream(fis);
+
+            //Recorremos todo el fichero y vamos cogiendo dato a dato para crear un objeto instrumento
+            while (true) {
+                String nombre = dis.readUTF();
+                String tipo = dis.readUTF();
+                String origen = dis.readUTF();
+                String material = dis.readUTF();
+                int precio = dis.readInt();
+
+                Instrumento i = new Instrumento(nombre, tipo, origen, material, precio);
+                listaInstrumentos.add(i);
+            }
+
+        } catch (EOFException e) {
+            System.out.println("Fin de fichero");
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(InstrumentoRepository.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(InstrumentoRepository.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                if (dis != null) {
+                    dis.close();
+                }
+                if (fis != null) {
+                    fis.close();
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(InstrumentoRepository.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return listaInstrumentos;
+    }
+
+    //Leeremos el fichero binario y lo almacenaremos directamente en objetos
+    public ArrayList<Instrumento> leerFicheroBinarioObjetos(String rutaOrigen) {
+
+        ArrayList<Instrumento> listaInstrumentos = new ArrayList<>();
+
+        File f;
+        FileInputStream fis = null;
+        ObjectInputStream ois = null;
+
+        f = new File(rutaOrigen);
+
+        try {
+            fis = new FileInputStream(f);
+            ois = new ObjectInputStream(fis);
+
+            //Recorremos todo el fichero y capturamos el error
+            while (true) {
+                //Vamos leyendo los objetos y los añadimos al array
+                Instrumento i = (Instrumento) ois.readObject();
+                listaInstrumentos.add(i);
+            }
+
+        } catch (EOFException e) {
+            System.out.println("Fin del fichero");
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(InstrumentoRepository.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException | ClassNotFoundException ex) {
+            Logger.getLogger(InstrumentoRepository.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                if (ois != null) {
+                    ois.close();
+                }
+                if (fis != null) {
+                    fis.close();
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(InstrumentoRepository.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        return listaInstrumentos;
+    }
+
     //Generaremos un comprobador que nos servira para saber si hemos leido bien los archivos.
-    public void vallezJesuitasComprobador(ArrayList<Instrumento> listaInstrumentos){      
+    public void vallezJesuitasComprobador(ArrayList<Instrumento> listaInstrumentos) {
         for (Instrumento listaInstrumento : listaInstrumentos) {
             System.out.println(listaInstrumento.toString());
-        }     
+        }
     }
 }
