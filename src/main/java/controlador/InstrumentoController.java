@@ -50,7 +50,7 @@ public class InstrumentoController {
                 case 1 -> {
                     v.preguntarRuta(PREGUNTAR_RUTA_ORIGEN);
                     rutaOrigen = sc.nextLine();
-                    ir.vallezJesuitasComprobador(ir.leerFicheroTxt(rutaOrigen));
+                    v.comprobador(ir.vallezJesuitasComprobador(ir.leerFicheroTxt(rutaOrigen)));
                     break;
                 }
                 case 2 -> {
@@ -80,12 +80,12 @@ public class InstrumentoController {
                 case 5 ->{
                     v.preguntarRuta(PREGUNTAR_RUTA_ORIGEN);
                     rutaOrigen = sc.nextLine();
-                    ir.vallezJesuitasComprobador(ir.leerFicheroBinarioDatos(rutaOrigen));
+                    v.comprobador(ir.vallezJesuitasComprobador(ir.leerFicheroBinarioDatos(rutaOrigen)));
                 }
                 case 6 ->{
                     v.preguntarRuta(PREGUNTAR_RUTA_ORIGEN);
                     rutaOrigen = sc.nextLine();
-                    ir.vallezJesuitasComprobador(ir.leerFicheroBinarioObjetos(rutaOrigen));
+                    v.comprobador(ir.vallezJesuitasComprobador(ir.leerFicheroBinarioObjetos(rutaOrigen)));
                 }      
                 case 28 -> {
                     continuar = false;

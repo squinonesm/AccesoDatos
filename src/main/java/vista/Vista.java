@@ -21,4 +21,8 @@ public class Vista {
     public void mostrarError(String error){
         System.out.println(error);
     }
+    
+    public void comprobador(String comprobacion){
+        System.out.println(comprobacion);
+    }
 }

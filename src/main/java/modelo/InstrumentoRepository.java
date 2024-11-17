@@ -307,9 +307,11 @@ public class InstrumentoRepository {
     }
 
     //Generaremos un comprobador que nos servira para saber si hemos leido bien los archivos.
-    public void vallezJesuitasComprobador(ArrayList<Instrumento> listaInstrumentos) {
+    public String vallezJesuitasComprobador(ArrayList<Instrumento> listaInstrumentos) {
+        String aux = "";
         for (Instrumento listaInstrumento : listaInstrumentos) {
-            System.out.println(listaInstrumento.toString());
+            aux += listaInstrumento.toString();
         }
+        return aux;
     }
 }
