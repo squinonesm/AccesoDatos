@@ -6,7 +6,7 @@ import java.io.Serializable;
  *
  * @author Sergio
  */
-public class Instrumento implements Serializable{
+public class Instrumento implements Serializable {
 
     private String nombre, tipo, origen, material;
     private int precio;

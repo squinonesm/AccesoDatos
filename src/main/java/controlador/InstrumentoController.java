@@ -37,6 +37,8 @@ public class InstrumentoController {
                       4- ESCRIBIR FICHERO BINARIO (OBJETOS)
                       5- LEER FICHERO BINARIO (DATOS)
                       6- LEER FICHERO BINARIO (OBJETOS)
+                      7- ESCRIBIR FICHERO ALEATORIO
+                      8- LEER FICHERO ALEATORIO
                       28- SALIR""";
         v.mostrarMenu(menu);
         int opcion = sc.nextInt();
@@ -77,16 +79,32 @@ public class InstrumentoController {
                     ir.escribirFicheroBinarioObjetos(rutaOrigen, rutaDestino);
                     break;
                 }
-                case 5 ->{
+                case 5 -> {
                     v.preguntarRuta(PREGUNTAR_RUTA_ORIGEN);
                     rutaOrigen = sc.nextLine();
                     v.comprobador(ir.vallezJesuitasComprobador(ir.leerFicheroBinarioDatos(rutaOrigen)));
+                    break;
                 }
-                case 6 ->{
+                case 6 -> {
                     v.preguntarRuta(PREGUNTAR_RUTA_ORIGEN);
                     rutaOrigen = sc.nextLine();
                     v.comprobador(ir.vallezJesuitasComprobador(ir.leerFicheroBinarioObjetos(rutaOrigen)));
-                }      
+                    break;
+                }
+                case 7 -> {
+                    v.preguntarRuta(PREGUNTAR_RUTA_ORIGEN);
+                    rutaOrigen = sc.nextLine();
+                    v.preguntarRuta(PREGUNTAR_RUTA_DESTINO);
+                    rutaDestino = sc.nextLine();
+                    ir.escribirFicheroAleatorio(rutaOrigen, rutaDestino);
+                    break;
+                }
+                case 8 -> {
+                    v.preguntarRuta(PREGUNTAR_RUTA_ORIGEN);
+                    rutaOrigen = sc.nextLine();
+                    v.comprobador(ir.vallezJesuitasComprobador(ir.leerFicheroAleatorio(rutaOrigen)));
+                    break;
+                }
                 case 28 -> {
                     continuar = false;
                     break;

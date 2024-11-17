@@ -14,6 +14,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,6 +24,17 @@ import java.util.logging.Logger;
  * @author Sergio
  */
 public class InstrumentoRepository {
+
+    //DECLARAMOS EL TAMAÑO DE NUESTROS ELEMENTOS
+    //NOMBRE+TIPO+ORIGEN+MATERIAL+PRECIO
+    //Uitilizaremos un valor generico de 15 caracteres para las cadenas
+    private final int LONGITUD_CADENA = 15;
+    //Las strings seran de 30, ya que cada caracter es x2 (15*2 = 30)
+    private final int NOMBRE = 30;
+    private final int TIPO = 30;
+    private final int ORIGEN = 30;
+    private final int MATERIAL = 30;
+    private final int PRECIO = 4;
 
     //Leemos un txt pasandole la ruta, devolvemos un array de instrumentos,
     public ArrayList<Instrumento> leerFicheroTxt(String rutaOrigen) {
@@ -306,11 +318,148 @@ public class InstrumentoRepository {
         return listaInstrumentos;
     }
 
+    //Leeremos un txt y lo almacenaremos en un fichero aleatorio
+    public void escribirFicheroAleatorio(String rutaOrigen, String rutaDestino) {
+
+        ArrayList<Instrumento> listaInstrumentos = leerFicheroTxt(rutaOrigen);
+
+        File f;
+        RandomAccessFile raf = null;
+
+        f = new File(rutaDestino);
+
+        try {
+            //Le marcamos el modo de escritura y lectura
+            raf = new RandomAccessFile(f, "rw");
+
+            //Nos colocamos en la posicion 0 (Siempre partimos de la base de sobreescribir o crear uno nuevo)
+            raf.seek(0);
+
+            //Recorremos el array y llamamos al metodo encargado de escribir 
+            //para evitar redundancia de codigo
+            for (Instrumento listaInstrumento : listaInstrumentos) {
+                escribirDatosFicheroAleatorio(raf, listaInstrumento);
+            }
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(InstrumentoRepository.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(InstrumentoRepository.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+
+            try {
+                if (raf != null) {
+                    raf.close();
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(InstrumentoRepository.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    //Para leer archivos aleatorios, nos servira para ver si escribimos bien o no
+    public ArrayList<Instrumento> leerFicheroAleatorio(String rutaOrigen) {
+
+        ArrayList<Instrumento> listaInstrumentos = new ArrayList<>();
+
+        File f;
+        RandomAccessFile raf = null;
+
+        f = new File(rutaOrigen);
+
+        try {
+            //Lo ponemos en modo lectura
+            raf = new RandomAccessFile(f, "r");
+            raf.seek(0);
+
+            //Un bucle para recorrer todo el archivo, pointer(posicion actual), lenght(tamaño total), marca el final
+            while (raf.getFilePointer() < raf.length()) {
+
+                StringBuilder sbNombre = new StringBuilder();
+                StringBuilder sbTipo = new StringBuilder();
+                StringBuilder sbOrigen = new StringBuilder();
+                StringBuilder sbMaterial = new StringBuilder();
+
+                //Leer nombre
+                for (int i = 0; i < LONGITUD_CADENA; i++) {
+                    sbNombre.append(raf.readChar());
+                }
+                //Leer tipo
+                for (int i = 0; i < LONGITUD_CADENA; i++) {
+                    sbTipo.append(raf.readChar());
+                }
+                //Leer origen
+                for (int i = 0; i < LONGITUD_CADENA; i++) {
+                    sbOrigen.append(raf.readChar());
+                }
+
+                //Leer material
+                for (int i = 0; i < LONGITUD_CADENA; i++) {
+                    sbMaterial.append(raf.readChar());
+                }
+                //Leer precio
+                int precio = raf.readInt();
+
+                Instrumento i = new Instrumento(sbNombre.toString(), sbTipo.toString(), sbOrigen.toString(), sbMaterial.toString(), precio);
+                listaInstrumentos.add(i);
+            }
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(InstrumentoRepository.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(InstrumentoRepository.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                if (raf != null) {
+                    raf.close();
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(InstrumentoRepository.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        return listaInstrumentos;
+    }
+
+    //Creamos un metodo auxiliar para escribir los datos
+    public void escribirDatosFicheroAleatorio(RandomAccessFile rf, Instrumento i) {
+
+        try {
+            //Nombre
+            StringBuilder sbNombre = new StringBuilder(i.getNombre());
+            sbNombre.setLength(LONGITUD_CADENA);
+            rf.writeChars(sbNombre.toString());
+
+            //Tipo
+            StringBuilder sbTipo = new StringBuilder(i.getTipo());
+            sbTipo.setLength(LONGITUD_CADENA);
+            rf.writeChars(sbTipo.toString());
+
+            //Origen
+            StringBuilder sbOrigen = new StringBuilder(i.getOrigen());
+            sbOrigen.setLength(LONGITUD_CADENA);
+            rf.writeChars(sbOrigen.toString());
+
+            //Material
+            StringBuilder sbMaterial = new StringBuilder(i.getMaterial());
+            sbMaterial.setLength(LONGITUD_CADENA);
+            rf.writeChars(sbMaterial.toString());
+
+            //Precio        
+            rf.writeInt(i.getPrecio());
+
+        } catch (IOException ex) {
+            Logger.getLogger(InstrumentoRepository.class
+                    .getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
     //Generaremos un comprobador que nos servira para saber si hemos leido bien los archivos.
     public String vallezJesuitasComprobador(ArrayList<Instrumento> listaInstrumentos) {
         String aux = "";
         for (Instrumento listaInstrumento : listaInstrumentos) {
-            aux += listaInstrumento.toString();
+            aux += listaInstrumento.toString() + "\n";
         }
         return aux;
     }
