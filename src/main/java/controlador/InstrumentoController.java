@@ -1,6 +1,7 @@
 package controlador;
 
 import java.util.Scanner;
+import modelo.Instrumento;
 import modelo.InstrumentoRepository;
 import vista.Vista;
 
@@ -19,6 +20,7 @@ public class InstrumentoController {
     boolean continuar = true;
     String rutaOrigen;
     String rutaDestino;
+    String nombre;
 
     Vista v;
     InstrumentoRepository ir;
@@ -39,6 +41,8 @@ public class InstrumentoController {
                       6- LEER FICHERO BINARIO (OBJETOS)
                       7- ESCRIBIR FICHERO ALEATORIO
                       8- LEER FICHERO ALEATORIO
+                      9- AÑADIR INSTRUMENTO
+                      10- BORRAR INSTRUMENTO
                       28- SALIR""";
         v.mostrarMenu(menu);
         int opcion = sc.nextInt();
@@ -105,6 +109,19 @@ public class InstrumentoController {
                     v.comprobador(ir.vallezJesuitasComprobador(ir.leerFicheroAleatorio(rutaOrigen)));
                     break;
                 }
+                case 9 -> {
+                    v.preguntarRuta(PREGUNTAR_RUTA_ORIGEN);
+                    rutaOrigen = sc.nextLine();
+                    v.comprobador(ir.añadirInstrumento(rutaOrigen, crearInstrumento()));
+                    break;
+                }
+                case 10 -> {
+                    v.preguntarRuta(PREGUNTAR_RUTA_ORIGEN);
+                    rutaOrigen = sc.nextLine();
+                    v.preguntarDatos("Nombre del instrumento a borrar");
+                    nombre = sc.nextLine();
+                    v.comprobador(ir.borrarInstrumentoFicheroAleatorio(rutaOrigen, nombre));
+                }
                 case 28 -> {
                     continuar = false;
                     break;
@@ -115,4 +132,22 @@ public class InstrumentoController {
             }
         }
     }
+
+    //He creado un metodo para simplemente crear instrumentos de forma rapida (en caso de necesitarlo mas veces
+    //no duplicamos codigo)
+    public Instrumento crearInstrumento() {
+        v.preguntarDatos("Introduzca el nombre del instrumento");
+        nombre = sc.nextLine();
+        v.preguntarDatos("Introduzca el tipo del instrumento");
+        String tipo = sc.nextLine();
+        v.preguntarDatos("Introduzca el origen del instrumento");
+        String origen = sc.nextLine();
+        v.preguntarDatos("Introduzca el material del instrumento");
+        String material = sc.nextLine();
+        v.preguntarDatos("Introduzca el precio del instrumento");
+        int precio = sc.nextInt();
+        Instrumento i = new Instrumento(nombre, tipo, origen, material, precio);
+        return i;
+    }
+
 }

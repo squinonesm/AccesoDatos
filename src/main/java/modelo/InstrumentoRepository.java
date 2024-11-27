@@ -35,6 +35,7 @@ public class InstrumentoRepository {
     private final int ORIGEN = 30;
     private final int MATERIAL = 30;
     private final int PRECIO = 4;
+    private final int VALOR_INSTRUMENTO = NOMBRE + TIPO + ORIGEN + MATERIAL + PRECIO;
 
     //Leemos un txt pasandole la ruta, devolvemos un array de instrumentos,
     public ArrayList<Instrumento> leerFicheroTxt(String rutaOrigen) {
@@ -419,6 +420,112 @@ public class InstrumentoRepository {
         }
 
         return listaInstrumentos;
+    }
+
+    //Vamos a crear un metodo para añadir un instrumento
+    //Nos basaremos en que solo puede haber 1 instrumento de cada tipo
+    public String añadirInstrumento(String rutaOrigen, Instrumento i) {
+
+        ArrayList<Instrumento> listaInstrumentos = leerFicheroAleatorio(rutaOrigen);
+
+        File f;
+        RandomAccessFile raf = null;
+
+        f = new File(rutaOrigen);
+
+        try {
+            //Lo ponemos rw porque tenemos que leer primero para ver si cambiamos y luego w para modificarlo
+            raf = new RandomAccessFile(f, "rw");
+
+            for (Instrumento listaInstrumento : listaInstrumentos) {
+                System.out.println(listaInstrumento.getNombre());
+                //Vamos comparando los nombres, en caso de coincidir salimos
+                if (listaInstrumento.getNombre().equalsIgnoreCase(i.getNombre())) {
+                    return "Ese tipo de instrumento ya existe";
+                }
+            }
+
+            //Nos colocamos al final del archivo (para que lo escriba al final)
+            //Sino ponemos nada se escribira por defecto arriba del todo
+            long posicion = raf.length();
+            raf.seek(posicion);
+
+            //En caso de no encontrarlo podemos escribirlo
+            escribirDatosFicheroAleatorio(raf, i);
+            return "Instrumento añadido con exito";
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(InstrumentoRepository.class.getName()).log(Level.SEVERE, null, ex);
+            return "ERROR INESPERADO";
+        } catch (IOException ex) {
+            Logger.getLogger(InstrumentoRepository.class.getName()).log(Level.SEVERE, null, ex);
+            return "ERROR INESPERADO";
+        } finally {
+            try {
+                if (raf != null) {
+                    raf.close();
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(InstrumentoRepository.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    //Realizaremos un borrado logico a traves del nombre
+    public String borrarInstrumentoFicheroAleatorio(String rutaOrigen, String nombre) {
+
+        File f;
+        RandomAccessFile raf = null;
+
+        f = new File(rutaOrigen);
+
+        try {
+            raf = new RandomAccessFile(f, "rw");
+
+            while (raf.getFilePointer() < raf.length()) {
+                //Leemos el nombre
+                StringBuilder sbNombre = new StringBuilder();
+                for (int i = 0; i < LONGITUD_CADENA; i++) {
+                    sbNombre.append(raf.readChar());
+                }
+                
+                //Comprobamos si ese nombre coincide
+                //Importante usar el trim, porque se rellena con espacios en blanco (para llegar al tamaño asignado)
+                if (sbNombre.toString().trim().equalsIgnoreCase(nombre)) {
+                    //Echamos la posicion para atras y procedemos al borrado logico
+                    raf.seek(raf.getFilePointer() - NOMBRE);
+                    //Nombre
+                    for (int i = 0; i < LONGITUD_CADENA; i++) {
+                        raf.writeChar(' ');
+                    }
+                    //Tipo
+                    for (int i = 0; i < LONGITUD_CADENA; i++) {
+                        raf.writeChar(' ');
+                    }
+                    //Origen
+                    for (int i = 0; i < LONGITUD_CADENA; i++) {
+                        raf.writeChar(' ');
+                    }
+                    //Material
+                    for (int i = 0; i < LONGITUD_CADENA; i++) {
+                        raf.writeChar(' ');
+                    }
+                    //Precio        
+                    raf.writeInt(0);
+                    return "BORRADO EXITOSO";
+                } else {
+                    //En caso de no coincidir nos movemos al siguiente instrumento
+                    raf.seek(raf.getFilePointer() - NOMBRE + VALOR_INSTRUMENTO);
+                }
+            }
+            return "NO SE HA ENCONTRADO ESE INSTRUMENTO";
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(InstrumentoRepository.class.getName()).log(Level.SEVERE, null, ex);
+            return "ERROR INESPERADO";
+        } catch (IOException ex) {
+            Logger.getLogger(InstrumentoRepository.class.getName()).log(Level.SEVERE, null, ex);
+            return "ERROR INESPERADO";
+        }
     }
 
     //Creamos un metodo auxiliar para escribir los datos
